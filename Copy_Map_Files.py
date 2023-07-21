@@ -21,6 +21,9 @@ def ProgressTrigger(window2):
 def copyMapjpgRAW(JPGname,_imgMapPath,window2):
     pureName = JPGname
     _pureName = pureName[:-4]
-    __pureName = _pureName+(".NEF")
 
-    shutil.copy2(os.path.join(_imgMapPath, __pureName), ('./selection'))
+    #print(os.path.join(_imgMapPath, "User/Desktop", "file.txt"))
+    __pureName = _pureName+(".NEF")
+    fullURLImg = os.path.join(_imgMapPath, __pureName)
+    fullURLImg = fullURLImg.replace("\\","/")
+    shutil.copy2(fullURLImg, ('./selection'))

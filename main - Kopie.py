@@ -20,67 +20,20 @@ def iteration(numbr):
     cnet = numbr
     print(cnet)
 
-
-isSet = False
-
-
-def setGlobalsInit(B):
-    global isSet
-    if (B == 'F'):
-        isSet = False
-    elif (B == 'T'):
-        isSet = True
-
-
-setGlobalsInit('F')
-
-
-def checkStatusBeforeSetIt(filename, status, noS):
-    print("checkStatusBeforeSetIt Entry Start", filename)
-    with open('data.json', "r") as json_file:
-        # json_file = open("data.json", "r")
-        data = json.load(json_file)
-        json_file.close()
-        tmp = data['photoSelection']
-        # print(tmp)
-        for ij in tmp:
-            print(ij)
-            if (ij['namez_'] == filename):
-                print("found")
-                setGlobalsInit('F')
-                ij['statusSelected'] = status
-                json_file = open("data.json", "w+")
-                json_file.write(json.dumps(data))
-                json_file.close()
-                return True
-
-                #setGlobalsInit('T')
-                    # if(Select_writeJson.kill_json(value)== 'done'):
-                # return 'done'
-
-
 def print_hi(name):
     # Use a breakpoint in the code line below to debug your script.
     print(f'Hi, {name}')  # Press Strg+F8 to toggle the breakpoint.
     # !/usr/bin/env python
 
     """
-    APSC Advanced Photo Selector C.
+    Simple Image Browser based on PySimpleGUI
     --------------------------------------------
-    M1 Mode Prepare:
-    1 Umwandeln der NEF Raw in JPG in 1000px max. Kantenlaenge
-    2 Einfache Bildbearbeitung AutoBright/Kontrast 
-    
-    M2 Mode Select:
-    3 Die aus M1 hergestellten JPG laden und Anzeigen
-    4 Auswaehlen "P" ( Mausrad Anwaehlen +/- ) oder wieder abwaehlen "U" und so zu einer JSON data.json adden
-    5 Die Angewaehlten Bilder bekommen einen gelben Rahmen und der Rahmen erscheint wenn man das Bild ansieht bzw wenn man es Ausgewaehlt hat. Beim Abwaehlen wird der Rahmen schwarz.
-    
-    M3 Mode Copy:
-    6 Die ausgewaelten JPG haben den gleichen dateinamen wie die NEF ( MUST HAVE )
-    7 Die Dateinamen der ausgewaehlten JPGs welche in der JSON Datei den Status: YAY haben werden auf den Ordner der NEF gemappt.
-    8 Die gemappten NEF Datein werden so in einen neuen Unter-Ordner des NEF Ordners kopiert.
-    
+    There are some improvements compared to the PNG browser of the repository:
+    1. Paging is cyclic, i.e. automatically wraps around if file index is outside
+    2. Supports all file types that are valid PIL images
+    3. Limits the maximum form size to the physical screen
+    4. When selecting an image from the listbox, subsequent paging uses its index
+    5. Paging performance improved significantly because of using PIL
 
     Dependecies
     ------------
@@ -146,21 +99,20 @@ def print_hi(name):
 
     # window = psg.Window('Progress Bar', layout_PB, size=(715, 150))
     col_files = [[sg.Listbox(values=fnames,
-                             # select_mode="extended",
+                             #select_mode="extended",
                              size=(60, 30),
                              default_values=['APSC'],
                              enable_events=True,
                              key='listbox')],
-                 [sg.Button('Exit', size=(8, 1)),  # programm beenden
-                  sg.Button('Deselect', size=(8, 1)),  # Auswahl aus json wieder entfernen bzw auf Null setzen
-                  sg.Button('Prev', size=(8, 1)),  # Ein Bild --
-                  sg.Button('Next', size=(8, 1)),  # Ein Bild ++
+                 [sg.Button('Exit', size=(8, 1)),  #programm beenden
+                  sg.Button('Deselect', size=(8, 1)),  #Auswahl aus json wieder entfernen bzw auf Null setzen
+                  sg.Button('Prev', size=(8, 1)), #Ein Bild --
+                  sg.Button('Next', size=(8, 1)), #Ein Bild ++
                   sg.Button('Select', size=(8, 2), change_submits=True),
-                  sg.Button('Set RAW-Folder', size=(9, 3)), ## next step
-                  sg.Button('xCopy', size=(8, 2)), ## next Step - hier wird der aktiv wenn man den RAW Folder ausgewaehlt hat.
+                  ## sg.Button('Set RAW-Folder', size=(9, 3)), ## next step
+                  # sg.Button('xCopy', size=(8, 2)), ## next Step - hier wird der aktiv wenn man den RAW Folder ausgewaehlt hat.
                   file_num_display_elem],
-                 [sg.Text('', key='-OUT-', enable_events=True, font=('Arial Bold', 16), justification='center',
-                          expand_x=True),
+                  [sg.Text('', key='-OUT-', enable_events=True, font=('Arial Bold', 16), justification='center', expand_x=True),
                   sg.ProgressBar(100, orientation='h', expand_x=True, size=(20, 20), key='-PBAR-')]]
 
     layout = [[sg.Column(col_files), sg.Column(col)]]
@@ -168,80 +120,50 @@ def print_hi(name):
     window = sg.Window('Image Browser', layout, return_keyboard_events=True,
                        location=(0, 0), use_default_focus=True)
     lb = window['listbox']
-    ##  sg.Button("xCopy", disabled=True)  "NEXT STEP"
+   ##  sg.Button("xCopy", disabled=True)  "NEXT STEP"
     # loop reading the user input and displaying image, filename
     i = 0
     imgMapPath = ""
-
-    def initJSON():
-        initDictionary = [
-            "initpath",
-            "status",
-             "initfilename"
-        ]
-        Select_writeJson.write_json(initDictionary)
-    initJSON()
-
     while True:
         # read the form
         event, values = window.read()
-        # print(event, values)
+        print(event, values)
         # perform button and keyboard operations
         if event == sg.WIN_CLOSED:
             break
-        ## elif event in ('Next', 'MouseWheel:Down', 'Down:40', 'Next:34'):
-        elif event in ('Next', 'MouseWheel:Down'):
+       ## elif event in ('Next', 'MouseWheel:Down', 'Down:40', 'Next:34'):
+        elif event in ('Next', 'MouseWheel:Down' ):
             i += 1
             filename = os.path.join(folder, fnames[i])
 
             f = fnames[i]  # selected filename
             k = fnames.index(f)  # update running index
-            lb.update(scroll_to_index=k, set_to_index=k)
-            # print("sf", i, fnames[i], k)
+            lb.update(scroll_to_index=k,set_to_index=k)
+            #print("sf", i, fnames[i], k)
 
             if i >= num_files:
-                # print("------")
+                print("------")
                 i -= num_files
 
 
-        ## elif event in ('Prev', 'MouseWheel:Up', 'Up:38', 'Prior:33'):
+       ## elif event in ('Prev', 'MouseWheel:Up', 'Up:38', 'Prior:33'):
         elif event in ('Prev', 'MouseWheel:Up'):
             i -= 1
-            # print("delegate")
+            #print("delegate")
             f = fnames[i]  # selected filename
             k = fnames.index(f)  # update running index
-            lb.update(scroll_to_index=k, set_to_index=k)
-            # print("sf", i, fnames[i], k)
+            lb.update(scroll_to_index=k,set_to_index=k)
+            #print("sf", i, fnames[i], k)
             if i < 0:
-                # print("+++++")
+                print("+++++")
                 i = num_files + i
 
         elif event in ('p:80'):
-            #   print("delegate")
-            #    print(fnames[i])
+         #   print("delegate")
+        #    print(fnames[i])
             window['Select'].click()
             filename = os.path.join(folder, fnames[i])
-        elif event in ('u:80'):
-            # print("delegate")
-            # print(fnames[i])
-            window['Deselect'].click()
-            filename = os.path.join(folder, fnames[i])
-        elif event in ('Deselect'):
-            i = i
-            filename = os.path.join(folder, fnames[i])
-            filename_ = fnames[i]
-            # print(filename)
-            status = "nay"
-            namez_ = filename_
-            noS = [filename, status, namez_]
-            print(" NAY OPT ")
-            if (checkStatusBeforeSetIt(filename_, status, noS)):
-                print("UPDATED NAY")
-            else:
-                Select_writeJson.write_json(noS)
-                print(" --NEW ENTRY N-A-Y ")
 
-            Write_MkDir.makeDir()
         elif event in ('Select'):
             i = i
             filename = os.path.join(folder, fnames[i])
@@ -250,34 +172,32 @@ def print_hi(name):
             status = "yay"
             namez_ = filename_
             noS = [filename, status, namez_]
-             #checkStatusBeforeSetIt(filename_, status, noS)
-            print(" YAY ")
-            if (checkStatusBeforeSetIt(filename_, status, noS)):
-                print("UPDATED")
-            else:
-                Select_writeJson.write_json(noS)
-                print(" --NEW ENTRY Y A Y -- ")
-
+            # Add here the selected file to the JSON Data file
+            Select_writeJson.write_json(noS)
+            # Create a new Directory to copy the mapped and selected files from JSON
             Write_MkDir.makeDir()
         elif event in ('xCopy'):
-            ###  window2['Write'].update(disabled=True)
+          ###  window2['Write'].update(disabled=True)
             window2 = window
             event, values = window2.read()
-            # print(event, values)
+            print(event, values)
             if imgMapPath != "":
+
                 with open('data.json') as json_file:
-                    data = json.load(json_file)
-                    for ij in data['photoSelection']:
-                        if (ij['statusSelected'] == "yay"):
-                            Copy_Map_Files.copyMapjpgRAW(ij['namez_'], imgMapPath, window2)
+                 data = json.load(json_file)
+                 for ij in data['photoSelection']:
+                       if (ij['statusSelected'] == "yay"):
+                            print(ij['file'])
+                            print(ij['namez_'])
+                            print(imgMapPath)
+                            print(window2)
+                            Copy_Map_Files.copyMapjpgRAW( ij['namez_'],imgMapPath,window2)
                             iteration(ij)
-        elif event in ("Set RAW-Folder"):
+        elif event in ( "Set RAW-Folder"):
             # Get the folder containin:g the images from the user
             imgMapPath = sg.popup_get_folder('Image folder to open', default_path='')
-            #imgMapPath = imgMapPath.replace('/', '\\')
-            imgMapPath = imgMapPath.replace('\\','/')
         #    if(imgMapPath != ""):
-        #      sg.Button("xCopy",disabled=False)
+         #      sg.Button("xCopy",disabled=False)
         if event == sg.WIN_CLOSED or event == 'Exit':
             break
 
@@ -296,6 +216,7 @@ def print_hi(name):
         file_num_display_elem.update('File {} of {}'.format(i + 1, num_files))
 
     window.close()
+
 
 
 if __name__ == '__main__':
