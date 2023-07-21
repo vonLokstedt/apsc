@@ -7,7 +7,6 @@ import os
 import time
 def say_JSON(value):
    #print("yay:",value )
-
    # Data to be written
    dictionary = {
        "file": value[0],
@@ -18,7 +17,7 @@ def say_JSON(value):
    # with open("selected_.json", "w") as outfile:
      #   json.dump(dictionary, outfile)
 def write_json(value, filename='data.json'):
-    print('write:'+value[2])
+    #print('write:'+value[2])
     with open(filename, 'r+') as file:
            # First we load existing data into a dict.
            file_data = json.load(file)
