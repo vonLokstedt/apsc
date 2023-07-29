@@ -54,16 +54,13 @@ def checkStatusBeforeSetIt(filename, status, noS):
                 json_file.close()
                 return True
 
-                #setGlobalsInit('T')
-                    # if(Select_writeJson.kill_json(value)== 'done'):
-                # return 'done'
+
 
 
 def print_hi(name):
     # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Strg+F8 to toggle the breakpoint.
-    # !/usr/bin/env python
-
+    print(f'Alive, {name}')  # Press Strg+F8 to toggle the breakpoint.
+    sg.theme('DarkTanBlue')
     """
     APSC Advanced Photo Selector C.
     --------------------------------------------
@@ -104,7 +101,7 @@ def print_hi(name):
     fnames = [f for f in flist0 if os.path.isfile(
         os.path.join(folder, f)) and f.lower().endswith(img_types)]
 
-    num_files = len(fnames)  # number of iamges found
+    num_files = len(fnames)  # number of img found
     if num_files == 0:
         sg.popup('No files in folder')
         raise SystemExit()
@@ -145,20 +142,21 @@ def print_hi(name):
     ]
 
     # window = psg.Window('Progress Bar', layout_PB, size=(715, 150))
-    col_files = [[sg.Listbox(values=fnames,
+    col_files = [[sg.Button('[X]', size=(8, 1)),],[sg.Listbox(values=fnames,
                              # select_mode="extended",
                              size=(60, 30),
                              default_values=['APSC'],
                              enable_events=True,
                              key='listbox')],
-                 [sg.Button('Exit', size=(8, 1)),  # programm beenden
+                 [  # programm beenden
                   sg.Button('Deselect', size=(8, 1)),  # Auswahl aus json wieder entfernen bzw auf Null setzen
                   sg.Button('Prev', size=(8, 1)),  # Ein Bild --
                   sg.Button('Next', size=(8, 1)),  # Ein Bild ++
-                  sg.Button('Select', size=(8, 2), change_submits=True),
-                  sg.Button('Set RAW-Folder', size=(9, 3)), ## next step
-                  sg.Button('xCopy', size=(8, 2)), ## next Step - hier wird der aktiv wenn man den RAW Folder ausgewaehlt hat.
+                  sg.Button('Select', size=(8, 1), change_submits=True),
+
                   file_num_display_elem],
+                 [sg.Button('Set RAW-Folder', size=(9, 3)), ## next step
+                  sg.Button('Copy NEF', size=(10, 3))], ## next Step - hier wird der aktiv wenn man den RAW Folder ausgewaehlt hat.],
                  [sg.Text('', key='-OUT-', enable_events=True, font=('Arial Bold', 16), justification='center',
                           expand_x=True),
                   sg.ProgressBar(100, orientation='h', expand_x=True, size=(20, 20), key='-PBAR-')]]
@@ -185,45 +183,27 @@ def print_hi(name):
     while True:
         # read the form
         event, values = window.read()
-        # print(event, values)
-        # perform button and keyboard operations
         if event == sg.WIN_CLOSED:
             break
-        ## elif event in ('Next', 'MouseWheel:Down', 'Down:40', 'Next:34'):
         elif event in ('Next', 'MouseWheel:Down'):
             i += 1
             filename = os.path.join(folder, fnames[i])
-
             f = fnames[i]  # selected filename
             k = fnames.index(f)  # update running index
             lb.update(scroll_to_index=k, set_to_index=k)
-            # print("sf", i, fnames[i], k)
-
             if i >= num_files:
-                # print("------")
                 i -= num_files
-
-
-        ## elif event in ('Prev', 'MouseWheel:Up', 'Up:38', 'Prior:33'):
         elif event in ('Prev', 'MouseWheel:Up'):
             i -= 1
-            # print("delegate")
             f = fnames[i]  # selected filename
             k = fnames.index(f)  # update running index
             lb.update(scroll_to_index=k, set_to_index=k)
-            # print("sf", i, fnames[i], k)
             if i < 0:
-                # print("+++++")
                 i = num_files + i
-
         elif event in ('p:80'):
-            #   print("delegate")
-            #    print(fnames[i])
             window['Select'].click()
             filename = os.path.join(folder, fnames[i])
         elif event in ('u:80'):
-            # print("delegate")
-            # print(fnames[i])
             window['Deselect'].click()
             filename = os.path.join(folder, fnames[i])
         elif event in ('Deselect'):
@@ -234,12 +214,12 @@ def print_hi(name):
             status = "nay"
             namez_ = filename_
             noS = [filename, status, namez_]
-            print(" NAY OPT ")
+
             if (checkStatusBeforeSetIt(filename_, status, noS)):
                 print("UPDATED NAY")
             else:
                 Select_writeJson.write_json(noS)
-                print(" --NEW ENTRY N-A-Y ")
+
 
             Write_MkDir.makeDir()
         elif event in ('Select'):
