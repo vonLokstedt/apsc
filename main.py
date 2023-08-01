@@ -5,7 +5,7 @@
 import PySimpleGUI as sg
 import time
 import PySimpleGUI as psg
-
+import sys
 import os
 from PIL import Image, ImageTk
 import io
@@ -21,18 +21,13 @@ def iteration(numbr):
     print(cnet)
 
 
-isSet = False
 
 
-def setGlobalsInit(B):
-    global isSet
-    if (B == 'F'):
-        isSet = False
-    elif (B == 'T'):
-        isSet = True
 
 
-setGlobalsInit('F')
+
+
+
 
 
 def checkStatusBeforeSetIt(filename, status, noS):
@@ -47,7 +42,7 @@ def checkStatusBeforeSetIt(filename, status, noS):
             print(ij)
             if (ij['namez_'] == filename):
                 print("found")
-                setGlobalsInit('F')
+
                 ij['statusSelected'] = status
                 json_file = open("data.json", "w+")
                 json_file.write(json.dumps(data))
